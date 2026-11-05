@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effeuille-Moi — le site, version affiche</title>
+<meta name="description" content="Effeuille-Moi, un jeu Android pour deux, un soir : une revue en trois actes, de l'effeuillage à la scène après minuit. Une production Karglass.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500;1,600&family=Josefin+Sans:wght@400;600;700&family=Sacramento&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+/* Maquette du site de promotion, troisième version : une affiche qui bouge plutôt qu'un
+   décor dessiné. Aucune illustration : de la typographie à très grande échelle, de la
+   lumière floue (bokeh, fumée, poursuite), du grain de pellicule, et le défilement qui
+   pilote le mouvement. Mêmes couleurs et mêmes trois voix que cabaret-3.html. */
+:root {
+  --fond-page: #050103;
+  --nuit: #0b0407;
+  --sombre: #120509;
+  --mur: #1d080d;
+  --velours: #5c0918;
+  --velours-clair: #8e1328;
+  --velours-sombre: #2c040b;
+  --prune: #3d0c26; --prune-clair: #6b1a45; --prune-sombre: #1e0613;
+  --laiton: #c9a46a;
+  --laiton-clair: #ecd3a3;
+  --laiton-sombre: #8d6a3a;
+  --encre: #f6e7dd;
+  --encre-douce: #cda99e;
+  --encre-faible: #8c6965;
+  --encre-voilee: rgba(246, 231, 221, .1);
+  --trait: rgba(246, 231, 221, .14);
+  --trait-fort: rgba(246, 231, 221, .4);
+  --neon: #ff3f86;
+  --neon-coeur: #ffe0eb;
+  --neon-blanc: #fff3f6;
+  --neon-halo: rgba(255, 50, 120, .5);
+  --neon-voile: rgba(255, 63, 134, .22);
+  --neon-survol: #ff6aa0;
+  --neon-encre: #1a0309;
+  --ampoule: #ffe4a8;
+  --ampoule-halo: rgba(255, 204, 102, .85);
+  --ambre: #ff9a5c;
+  --flamme: #ffd27a;
+  --poursuite: rgba(255, 226, 190, .16);
+  --ombre-forte: rgba(0, 0, 0, .7);
+  --vitre: rgba(14, 4, 7, .55);
+
+  --f-neon: "Sacramento", cursive;
+  --f-voix: "Cormorant Garamond", Garamond, serif;
+  --f-ui: "Josefin Sans", system-ui, sans-serif;
+  --r-1: 3px; --r-2: 6px; --r-3: 12px;
+  --sortie: cubic-bezier(.2, .8, .2, 1);
+  --gouttiere: clamp(16px, 4vw, 56px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--fond-page); color: var(--encre); font-family: var(--f-ui); line-height: 1.55; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--neon); outline-offset: 4px; }
+.js body:not(.pret) { overflow: hidden; }
+
+/* Le grain de pellicule, par-dessus tout : c'est lui qui ôte l'air « dessiné » */
+body::after {
+  content: ""; position: fixed; inset: -50%; z-index: 90; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  animation: grain .9s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); }
+}
+
+.surtitre { font-weight: 600; font-size: .74rem; letter-spacing: .34em; text-transform: uppercase; color: var(--laiton); }
+.bouton {
+  display: inline-flex; align-items: center; gap: .9em; min-height: 58px; padding: 0 1.9em; border-radius: 99px;
+  font-weight: 700; font-size: .86rem; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap;
+  transition: background .4s, color .4s, box-shadow .4s, transform .5s var(--sortie);
+}
+.bouton.neon { background: var(--neon); color: var(--neon-encre); box-shadow: 0 0 30px var(--neon-halo); }
+.bouton.neon:hover { background: var(--neon-survol); box-shadow: 0 0 50px var(--neon); }
+.bouton.fil { border: 1px solid var(--trait-fort); color: var(--encre); }
+.bouton.fil:hover { background: var(--encre); color: var(--neon-encre); }
+.bouton.sombre { background: var(--neon-encre); color: var(--neon-coeur); }
+.bouton.sombre:hover { background: var(--nuit); box-shadow: 0 20px 50px var(--ombre-forte); }
+.bouton .fleche { display: inline-block; transition: transform .5s var(--sortie); }
+.bouton:hover .fleche { transform: translateY(3px); }
+
+/* ======================================================================
+   Le seuil : 18+, puis l'iris se referme sur la question
+   ====================================================================== */
+.seuil {
+  position: fixed; inset: 0; z-index: 80; display: none; place-items: center; text-align: center;
+  background: radial-gradient(60% 60% at 50% 45%, var(--velours-sombre), var(--fond-page) 75%);
+  clip-path: circle(150% at 50% 50%); transition: clip-path 1.4s cubic-bezier(.7, 0, .2, 1);
+  padding: 24px;
+}
+.js .seuil { display: grid; }
+.seuil.parti { clip-path: circle(0% at 50% 50%); }
+.seuil.cache { display: none !important; }
+.seuil .dixhuit {
+  font-family: var(--f-voix); font-weight: 600; font-style: italic; font-size: min(46vw, 52vh); line-height: .8; letter-spacing: -.04em;
+  color: transparent; -webkit-text-stroke: 1.5px var(--neon); text-shadow: 0 0 40px var(--neon-voile);
+  animation: vacille 5s steps(1) infinite;
+}
+@keyframes vacille { 0%, 87%, 90%, 94%, 100% { opacity: 1; } 88%, 92% { opacity: .35; } }
+.seuil p { margin: 1.4rem auto 1.8rem; max-width: 30ch; font-family: var(--f-voix); font-style: italic; font-size: clamp(1.3rem, 3vw, 1.8rem); color: var(--encre); }
+.seuil .choix { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.seuil .refus { display: none; }
+.seuil.refuse .accueil { display: none; }
+.seuil.refuse .refus { display: block; }
+
+/* ======================================================================
+   L'affiche : l'enseigne au néon, dans son cadre d'ampoules
+   ====================================================================== */
+.affiche { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: var(--nuit); isolation: isolate; }
+.fumee { position: absolute; z-index: -3; border-radius: 50%; filter: blur(70px); opacity: .8; }
+.fumee.a { width: 70vmax; height: 50vmax; left: -20vmax; top: -10vmax; background: radial-gradient(var(--velours-clair), transparent 65%); animation: derive-a 22s ease-in-out infinite alternate; }
+.fumee.b { width: 60vmax; height: 60vmax; right: -25vmax; bottom: -25vmax; background: radial-gradient(var(--prune-clair), transparent 65%); animation: derive-b 26s ease-in-out infinite alternate; }
+.fumee.c { width: 40vmax; height: 30vmax; left: 30%; top: 40%; background: radial-gradient(var(--neon-voile), transparent 70%); animation: derive-a 18s ease-in-out infinite alternate-reverse; }
+@keyframes derive-a { to { transform: translate(18vmax, 10vmax) scale(1.25); } }
+@keyframes derive-b { to { transform: translate(-14vmax, -12vmax) scale(.85); } }
+.bokeh { position: absolute; inset: 0; z-index: -2; pointer-events: none; }
+.bokeh i { position: absolute; border-radius: 50%; mix-blend-mode: screen; animation: flotte var(--t) ease-in-out infinite alternate; }
+@keyframes flotte { to { transform: translate(var(--dx), var(--dy)); } }
+.lumiere {
+  position: absolute; z-index: -1; left: var(--mx, 50%); top: var(--my, 50%); width: 60vmax; aspect-ratio: 1;
+  transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(closest-side, var(--poursuite), transparent);
+}
+
+.enseigne-cadre {
+  position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 1;
+  width: min(1120px, calc(100vw - 2 * var(--gouttiere))); padding: clamp(30px, 6vh, 64px) clamp(14px, 4vw, 60px);
+  text-align: center; border-radius: var(--r-3); container-type: inline-size;
+  box-shadow: inset 0 0 0 12px transparent, inset 0 0 0 13px rgba(201, 164, 106, .35);
+}
+/* les ampoules du cadre : deux rangs décalés qui s'allument tour à tour, en chenillard */
+.enseigne-cadre::before, .enseigne-cadre::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: .14;
+  --b: radial-gradient(circle, var(--ampoule) 0 3px, transparent 4px);
+  background: var(--b) 0 0 / 28px 14px repeat-x, var(--b) 0 100% / 28px 14px repeat-x, var(--b) 0 0 / 14px 28px repeat-y, var(--b) 100% 0 / 14px 28px repeat-y;
+  filter: drop-shadow(0 0 3px var(--ampoule-halo)) drop-shadow(0 0 9px var(--ampoule-halo));
+}
+.enseigne-cadre::after { background-position: 14px 0, 14px 100%, 0 14px, 100% 14px; }
+.pret .enseigne-cadre::before { animation: chenille .9s steps(1) infinite 1.4s; }
+.pret .enseigne-cadre::after { animation: chenille .9s steps(1) infinite 1.85s; }
+@keyframes chenille { 0% { opacity: 1; } 50% { opacity: .14; } }
+.halo-enseigne {
+  position: absolute; z-index: -1; inset: 8% 2%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, var(--neon-halo), transparent); filter: blur(40px); opacity: 0;
+}
+.pret .halo-enseigne { animation: pouls 3.6s ease-in-out infinite 1.6s; }
+@keyframes pouls { 0%, 100% { opacity: .45; transform: scale(1); } 50% { opacity: .8; transform: scale(1.06); } }
+.presente { font-weight: 700; font-size: clamp(.68rem, 1.3vw, .88rem); letter-spacing: .5em; padding-left: .5em; text-transform: uppercase; color: var(--laiton-clair); }
+.enseigne {
+  margin: .06em 0 .4em; font-family: var(--f-neon); font-weight: 400; font-size: min(15cqi, 22vh); line-height: 1.1;
+  color: var(--neon-coeur); white-space: nowrap;
+}
+.enseigne span { display: inline-block; text-shadow: 0 0 2px var(--neon-blanc), 0 0 10px var(--neon), 0 0 28px var(--neon), 0 0 72px var(--neon-halo); }
+.js .enseigne span { opacity: .07; }
+/* les tubes s'allument un à un, puis une vague d'éclat parcourt l'enseigne ; deux tubes restent capricieux */
+.pret .enseigne span { animation: tube 1.1s steps(1) both, vague 5s ease-in-out infinite; animation-delay: calc(var(--i) * 85ms + .3s), calc(var(--i) * 110ms + 3s); }
+.pret .enseigne span.caprice { animation: tube 1.1s steps(1) both, vague 5s ease-in-out infinite, caprice 6s steps(1) infinite; animation-delay: calc(var(--i) * 85ms + .3s), calc(var(--i) * 110ms + 3s), 4.5s; }
+@keyframes tube { 0% { opacity: .07; } 15% { opacity: 1; } 22% { opacity: .1; } 38% { opacity: 1; } 44% { opacity: .2; } 60%, 100% { opacity: 1; } }
+@keyframes vague { 0%, 22%, 100% { transform: none; filter: none; } 11% { transform: translateY(-5%) scale(1.07); filter: brightness(1.4); } }
+@keyframes caprice { 0%, 90%, 92%, 95%, 100% { opacity: 1; } 91%, 94% { opacity: .2; } }
+.sous { font-family: var(--f-voix); font-style: italic; font-size: clamp(1.1rem, 2.4vw, 1.75rem); color: var(--encre-douce); }
+.sous b { font-family: var(--f-ui); font-style: normal; font-weight: 700; font-size: .5em; letter-spacing: .4em; color: var(--neon); vertical-align: middle; margin: 0 .6em; }
+.js .presente, .js .sous { opacity: 0; transform: translateY(12px); }
+.pret .presente, .pret .sous { opacity: 1; transform: none; transition: opacity 1s 1.4s, transform 1s var(--sortie) 1.4s; }
+
+.barre { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 22px var(--gouttiere); z-index: 2; }
+.barre .marque { font-weight: 700; font-size: .8rem; letter-spacing: .4em; color: var(--laiton-clair); }
+.barre .bouton { min-height: 44px; padding: 0 1.3em; font-size: .72rem; }
+.pied-affiche {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 0 var(--gouttiere) 28px;
+  display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap;
+}
+.pied-affiche .accroche { max-width: 36ch; font-family: var(--f-voix); font-style: italic; font-size: clamp(1.1rem, 2.2vw, 1.45rem); line-height: 1.35; color: var(--encre-douce); }
+.pied-affiche .accroche b { font-style: normal; font-weight: 600; color: var(--encre); }
+.defilez { display: flex; align-items: center; gap: 14px; font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: var(--encre-faible); }
+.defilez span { position: relative; width: 1px; height: 56px; background: var(--trait); overflow: hidden; }
+.defilez span::after { content: ""; position: absolute; left: 0; top: -40%; width: 100%; height: 40%; background: var(--neon); animation: goutte 2s var(--sortie) infinite; }
+@keyframes goutte { to { top: 100%; } }
+.js .pied-affiche, .js .barre { opacity: 0; transform: translateY(20px); }
+.pret .pied-affiche, .pret .barre { opacity: 1; transform: none; transition: opacity 1s 1.6s, transform 1s var(--sortie) 1.6s; }
+
+/* ======================================================================
+   Les bandeaux : deux rubans de marquise qui défilent, plus vite si l'on défile
+   ====================================================================== */
+.bandeaux { position: relative; padding: 9vw 0; overflow: hidden; background: var(--fond-page); }
+.ruban { display: flex; white-space: nowrap; padding: 1.1rem 0; will-change: transform; }
+.ruban .piste { display: flex; flex: none; }
+.ruban span { font-weight: 700; font-size: clamp(1.4rem, 4vw, 3.6rem); letter-spacing: .06em; text-transform: uppercase; padding-right: .7em; }
+.ruban em { font-family: var(--f-voix); font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 1.15em; }
+.ruban.rose { background: var(--neon); color: var(--neon-encre); transform: rotate(-3deg) scale(1.06); box-shadow: 0 0 60px var(--neon-voile); }
+.ruban.laiton { background: var(--laiton); color: var(--neon-encre); transform: rotate(2deg) scale(1.06); margin-top: -.6rem; }
+
+/* ======================================================================
+   Les trois actes : la page défile, la scène glisse de côté
+   ====================================================================== */
+.actes { position: relative; height: 380vh; }
+.collant { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.chemin { display: flex; height: 100%; will-change: transform; }
+.acte { position: relative; flex: none; width: 100vw; height: 100%; overflow: hidden; display: grid; align-items: center; isolation: isolate; }
+.acte .ambiance { position: absolute; inset: 0; z-index: -2; }
+.acte .numeral {
+  position: absolute; z-index: -1; left: -2vw; bottom: -8vh; font-family: var(--f-voix); font-weight: 600; font-size: 84vh; line-height: .8;
+  color: transparent; -webkit-text-stroke: 1px var(--laiton); opacity: .35; will-change: transform;
+}
+.acte .texte { margin-left: auto; width: min(640px, 100%); padding: 0 var(--gouttiere); }
+.acte h3 { font-family: var(--f-voix); font-style: italic; font-weight: 500; font-size: clamp(3.4rem, 9vw, 8rem); line-height: 1; letter-spacing: -.03em; margin: .9rem 0 2.4rem; }
+.acte h3 b { font-family: var(--f-neon); font-weight: 400; font-style: normal; letter-spacing: 0; color: var(--neon-coeur); text-shadow: 0 0 14px var(--neon), 0 0 40px var(--neon-halo); }
+.acte p { font-family: var(--f-voix); font-size: clamp(1.15rem, 1.8vw, 1.45rem); line-height: 1.45; color: var(--encre-douce); max-width: 34ch; }
+.acte .lieu { display: block; margin-top: 1.6rem; font-size: .76rem; letter-spacing: .3em; text-transform: uppercase; color: var(--encre-faible); }
+
+/* I — la salle : une rangée de lampes floues au loin, la lueur rouge d'une table */
+.acte.i .ambiance {
+  background:
+    radial-gradient(60% 40% at 50% 115%, var(--velours-clair), transparent 70%),
+    radial-gradient(90% 70% at 30% 30%, var(--mur), var(--nuit) 70%);
+}
+.acte.i .lampes { position: absolute; z-index: -1; top: 22%; left: -5%; right: -5%; height: 12vh; filter: blur(9px);
+  background: radial-gradient(circle, var(--ampoule) 0 14%, transparent 42%) 0 50% / 9vw 12vh repeat-x; opacity: .55; animation: respire 6s ease-in-out infinite; }
+@keyframes respire { 50% { opacity: .3; } }
+/* II — le salon : velours prune, deux flammes floues qui vacillent */
+.acte.ii .ambiance {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 6vw, rgba(0, 0, 0, .35) 7vw, transparent 9vw),
+    radial-gradient(80% 80% at 35% 60%, var(--prune-clair), var(--prune) 45%, var(--prune-sombre));
+  filter: blur(2px);
+}
+.acte.ii .flamme { position: absolute; z-index: -1; width: 26vmin; aspect-ratio: 1 / 1.4; border-radius: 50%; filter: blur(28px); mix-blend-mode: screen;
+  background: radial-gradient(50% 50% at 50% 60%, var(--neon-coeur), var(--flamme) 30%, var(--ambre) 55%, transparent 72%); animation: vacillement 2.6s ease-in-out infinite; }
+.acte.ii .flamme.a { left: 14%; top: 34%; }
+.acte.ii .flamme.b { left: 30%; top: 42%; width: 20vmin; animation-delay: -1.2s; }
+@keyframes vacillement { 0%, 100% { transform: scale(1) translate(0, 0); opacity: .9; } 35% { transform: scale(.9, 1.08) translate(-6px, -4px); opacity: .75; } 70% { transform: scale(1.06, .94) translate(5px, 2px); opacity: 1; } }
+/* III — la scène : le noir, une poursuite oblique, de la poussière dans le faisceau */
+.acte.iii .ambiance { background: radial-gradient(70% 60% at 30% 100%, var(--velours-sombre), var(--fond-page) 70%); }
+.acte.iii .faisceau { position: absolute; z-index: -1; top: -20%; left: -10%; width: 70vw; height: 140%; filter: blur(34px); transform-origin: 0 0; mix-blend-mode: screen;
+  animation: cherche 9s ease-in-out infinite alternate; }
+.acte.iii .faisceau i { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(255, 226, 190, .3), rgba(255, 226, 190, .04) 70%); clip-path: polygon(0 0, 18% 0, 75% 100%, 40% 100%); }
+@keyframes cherche { from { transform: rotate(-6deg); } to { transform: rotate(4deg); } }
+.acte.iii .tache { position: absolute; z-index: -1; left: 26%; bottom: 6%; width: 36vw; height: 12vh; border-radius: 50%; filter: blur(24px); background: radial-gradient(rgba(255, 226, 190, .35), transparent 70%); }
+
+.carte-acte {
+  position: absolute; z-index: 0; left: clamp(16px, 8vw, 150px); top: 50%; width: min(410px, 34vw); padding: 30px 30px 26px;
+  border-radius: var(--r-3); background: rgba(14, 4, 7, .58); border: 1px solid var(--trait-fort);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 40px 90px var(--ombre-forte);
+  transform: translateY(-50%); rotate: -3deg; animation: balance 7s ease-in-out infinite; will-change: translate;
+}
+.acte.ii .carte-acte { rotate: 2deg; animation-delay: -2s; }
+.acte.iii .carte-acte { rotate: -1.5deg; animation-delay: -4s; }
+@keyframes balance { 50% { rotate: 0deg; } }
+.carte-acte figcaption { font-weight: 600; font-size: .7rem; letter-spacing: .3em; text-transform: uppercase; color: var(--laiton); }
+.carte-acte blockquote { margin-top: 16px; font-family: var(--f-voix); font-style: italic; font-size: clamp(1.35rem, 2vw, 1.8rem); line-height: 1.3; color: var(--encre); }
+.carte-acte .pied-carte { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.carte-acte .pastille { padding: 6px 12px; border-radius: 99px; border: 1px solid var(--neon); color: var(--neon-coeur); font-size: .68rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
+.carte-acte .pastille.laiton { border-color: var(--laiton); color: var(--laiton-clair); }
+.carte-acte .flou { filter: blur(7px); user-select: none; }
+.carte-acte .tampon {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-11deg); white-space: nowrap;
+  padding: 10px 18px; border: 2px solid var(--neon); border-radius: var(--r-1); background: rgba(5, 1, 3, .5);
+  color: var(--neon-coeur); font-weight: 700; font-size: .8rem; letter-spacing: .3em; text-transform: uppercase;
+  text-shadow: 0 0 8px var(--neon); box-shadow: 0 0 18px var(--neon-voile), inset 0 0 12px var(--neon-voile);
+  animation: vacille 5s steps(1) infinite;
+}
+.faits { display: grid; grid-template-columns: repeat(3, minmax(0, max-content)); gap: 26px; margin-top: 1.9rem; }
+.faits dt { font-family: var(--f-ui); font-weight: 700; font-size: clamp(1.7rem, 2.8vw, 2.6rem); line-height: 1; color: var(--neon-coeur); text-shadow: 0 0 18px var(--neon-voile); }
+.faits dd { margin-top: 8px; max-width: 15ch; font-size: .7rem; font-weight: 600; letter-spacing: .14em; line-height: 1.5; text-transform: uppercase; color: var(--encre-douce); }
+
+.jalons { position: absolute; left: var(--gouttiere); right: var(--gouttiere); bottom: 26px; display: flex; align-items: center; gap: 18px; font-family: var(--f-voix); font-size: 1.1rem; color: var(--encre-faible); }
+.jalons .rail { flex: 1; height: 1px; background: var(--trait); position: relative; }
+.jalons .rail i { position: absolute; left: 0; top: 0; height: 100%; width: var(--p, 0%); background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+.jalons b { font-weight: 500; transition: color .4s; }
+.jalons b.actif { color: var(--neon-coeur); }
+
+/* ======================================================================
+   Le manifeste : les phrases se remplissent de lumière au défilement
+   ====================================================================== */
+.manifeste { padding: 22vh var(--gouttiere); background: var(--fond-page); }
+.manifeste p {
+  font-family: var(--f-voix); font-style: italic; font-weight: 500; font-size: clamp(2.4rem, 7.4vw, 7rem); line-height: 1; letter-spacing: -.025em;
+  max-width: 14em; margin: 0 auto .35em;
+  background: linear-gradient(90deg, var(--encre) var(--p, 0%), var(--trait) var(--p, 0%));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.manifeste p:nth-child(2) { text-align: right; }
+.manifeste p .n { font-family: var(--f-neon); font-style: normal; font-weight: 400; letter-spacing: 0;
+  background: linear-gradient(90deg, var(--neon) var(--p, 0%), var(--neon-voile) var(--p, 0%)); -webkit-background-clip: text; background-clip: text; }
+
+/* ======================================================================
+   Les chiffres de la maison : six cases qui comptent
+   ====================================================================== */
+.chiffres { padding: 8vh var(--gouttiere) 16vh; background: var(--fond-page); }
+.chiffres .entete { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; max-width: 1280px; margin: 0 auto 40px; }
+.chiffres h2 { font-family: var(--f-voix); font-style: italic; font-weight: 500; font-size: clamp(2.4rem, 5vw, 4.4rem); line-height: 1; letter-spacing: -.02em; }
+.grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; max-width: 1280px; margin: 0 auto; }
+.case {
+  position: relative; overflow: hidden; min-height: 280px; padding: 28px; border-radius: var(--r-3);
+  display: flex; flex-direction: column; justify-content: space-between;
+  background: radial-gradient(400px circle at var(--x, 50%) var(--y, 50%), var(--neon-voile), transparent 60%), var(--sombre);
+  border: 1px solid var(--trait); transition: border-color .4s, transform .6s var(--sortie);
+}
+.case:hover { border-color: var(--neon); transform: translateY(-4px); }
+.case .nombre { font-variant-numeric: lining-nums; font-feature-settings: "lnum"; font-family: var(--f-voix); font-weight: 600; font-size: clamp(5rem, 10vw, 9rem); line-height: .85; letter-spacing: -.04em; color: var(--encre); }
+.case .nombre small { font-size: .45em; color: var(--laiton); letter-spacing: 0; }
+.case h3 { font-weight: 700; font-size: .82rem; letter-spacing: .26em; text-transform: uppercase; color: var(--laiton-clair); margin-bottom: .5rem; }
+.case p { font-family: var(--f-voix); font-style: italic; font-size: 1.15rem; line-height: 1.4; color: var(--encre-douce); }
+.case.bande { grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; gap: 40px; }
+.case.bande > div { max-width: 52ch; }
+.case.large { grid-column: span 2; background: radial-gradient(500px circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, .18), transparent 60%), var(--neon); border-color: var(--neon); }
+.case.large .nombre, .case.large h3, .case.large p { color: var(--neon-encre); }
+
+/* ======================================================================
+   Le ton : une réplique à la fois, qui sort du flou
+   ====================================================================== */
+.ton { position: relative; min-height: 90vh; padding: 14vh var(--gouttiere); display: grid; align-content: center; justify-items: center; text-align: center; overflow: hidden; isolation: isolate;
+  background: radial-gradient(60% 60% at 50% 50%, var(--velours-sombre), var(--fond-page) 70%); }
+.ton::before { content: ""; position: absolute; z-index: -1; width: 50vmax; aspect-ratio: 1; border-radius: 50%; filter: blur(80px); background: var(--neon-voile); animation: derive-a 16s ease-in-out infinite alternate; left: 10%; top: 10%; }
+.replique { margin: 2.4rem 0; max-width: 18em; min-height: 3.2em; font-family: var(--f-voix); font-style: italic; font-weight: 500; font-size: clamp(2rem, 5.4vw, 5rem); line-height: 1.08; letter-spacing: -.015em; }
+.replique .mot { display: inline-block; white-space: pre; }
+.js .replique .mot { opacity: 0; filter: blur(14px); transform: translateY(.35em); }
+.replique.entre .mot { opacity: 1; filter: blur(0); transform: none; transition: opacity .9s, filter .9s, transform 1s var(--sortie); transition-delay: calc(var(--i) * 70ms); }
+.replique.sort .mot { opacity: 0; filter: blur(14px); transform: translateY(-.35em); transition: opacity .5s, filter .5s, transform .5s; transition-delay: calc(var(--i) * 25ms); }
+.ton .qui { font-size: .76rem; letter-spacing: .32em; text-transform: uppercase; color: var(--encre-faible); }
+.points { display: flex; gap: 10px; margin-top: 2rem; }
+.points i { width: 26px; height: 2px; background: var(--trait); transition: background .4s, width .4s; }
+.points i.actif { width: 46px; background: var(--neon); }
+
+/* ======================================================================
+   Le téléchargement : le vestiaire, sur velours sombre
+   ====================================================================== */
+.telecharger {
+  position: relative; overflow: hidden; padding: 18vh var(--gouttiere) 14vh; color: var(--encre); isolation: isolate;
+  background:
+    radial-gradient(50% 60% at 78% 30%, var(--velours-clair), transparent 70%),
+    radial-gradient(60% 70% at 15% 90%, var(--prune), transparent 70%),
+    var(--velours-sombre);
+}
+.telecharger::before { /* une flaque de néon derrière le bouton, qui respire */
+  content: ""; position: absolute; z-index: -1; right: 8%; top: 30%; width: 40vmax; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--neon-voile), transparent); filter: blur(30px); animation: pouls 4s ease-in-out infinite;
+}
+.telecharger .defile { position: absolute; z-index: -1; top: 64%; left: 0; display: flex; white-space: nowrap; transform: translateY(-50%); }
+.telecharger .defile span { font-family: var(--f-neon); font-size: 34vh; line-height: 1.2; padding-right: .3em; color: transparent; -webkit-text-stroke: 1.5px rgba(255, 63, 134, .32); }
+.telecharger .corps { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 6vw; align-items: end; }
+.telecharger h2 { font-family: var(--f-voix); font-style: italic; font-weight: 500; font-size: clamp(3rem, 8vw, 7.4rem); line-height: .95; letter-spacing: -.035em; margin-top: .6rem; }
+.telecharger h2 b { font-family: var(--f-neon); font-weight: 400; font-style: normal; letter-spacing: 0; color: var(--neon-coeur); text-shadow: 0 0 10px var(--neon), 0 0 34px var(--neon-halo); }
+.telecharger .fiche { display: grid; gap: 26px; padding: 28px; border-radius: var(--r-3); background: rgba(5, 1, 3, .55); border: 1px solid var(--trait); backdrop-filter: blur(8px); }
+.telecharger .details { display: grid; grid-template-columns: 1fr 1fr; }
+.telecharger .details div { padding: 12px 0; border-bottom: 1px solid var(--trait); }
+.telecharger .details dt { font-size: .7rem; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: var(--laiton); }
+.telecharger .details dd { font-family: var(--f-voix); font-size: 1.55rem; font-weight: 600; color: var(--encre); font-variant-numeric: lining-nums; }
+.telecharger .aimant { justify-self: start; }
+.etapes { list-style: none; counter-reset: e; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4vw; max-width: 1180px; margin: 12vh auto 0; }
+.etapes li { counter-increment: e; font-family: var(--f-voix); font-size: 1.2rem; line-height: 1.45; color: var(--encre-douce); padding-top: 18px; border-top: 1px solid var(--trait-fort); }
+.etapes li::before { content: "0" counter(e); display: block; font-family: var(--f-ui); font-weight: 700; font-size: .8rem; letter-spacing: .3em; margin-bottom: .6rem; color: var(--neon); }
+.etapes b { display: block; font-style: italic; font-size: 1.75rem; font-weight: 600; margin-bottom: .2rem; color: var(--encre); }
+.telecharger .note { max-width: 1180px; margin: 6vh auto 0; font-size: .86rem; color: var(--encre-douce); }
+
+/* ======================================================================
+   La signature
+   ====================================================================== */
+footer { padding: 14vh var(--gouttiere) 40px; background: var(--fond-page); overflow: hidden; }
+footer .production { text-align: center; font-size: .76rem; letter-spacing: .5em; text-transform: uppercase; color: var(--laiton); }
+footer .studio {
+  display: block; text-align: center; white-space: nowrap; margin: 2vh 0 6vh; font-family: var(--f-voix); font-weight: 600; font-size: min(15vw, 260px); line-height: .9; letter-spacing: .06em; padding-left: .06em;
+  background: linear-gradient(90deg, var(--laiton-clair) var(--p, 0%), transparent var(--p, 0%)); -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-stroke: 1px var(--laiton);
+}
+footer .legal { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: .8rem; color: var(--encre-faible); border-top: 1px solid var(--trait); padding-top: 24px; }
+footer .legal p { max-width: 70ch; }
+
+/* ---------- Le curseur : une poursuite miniature (souris seulement) ---------- */
+.anneau { position: fixed; z-index: 95; left: 0; top: 0; width: 38px; height: 38px; margin: -19px 0 0 -19px; border: 1px solid var(--neon); border-radius: 50%; pointer-events: none;
+  opacity: 0; transition: width .35s var(--sortie), height .35s var(--sortie), margin .35s var(--sortie), background .35s, opacity .3s; mix-blend-mode: screen; }
+.anneau.vu { opacity: 1; }
+.anneau.gros { width: 78px; height: 78px; margin: -39px 0 0 -39px; background: var(--neon-voile); }
+
+/* ---------- Apparitions ---------- */
+.js .monte { opacity: 0; transform: translateY(40px); }
+.monte.vu { opacity: 1; transform: none; transition: opacity 1s, transform 1.2s var(--sortie); transition-delay: var(--d, 0s); }
+
+/* ---------- Petits écrans ---------- */
+@media (max-width: 860px) {
+  .grille { grid-template-columns: 1fr; }
+  .case.large, .case.bande { grid-column: auto; }
+  .case.bande { flex-direction: column; align-items: start; gap: 24px; }
+  .case { min-height: 220px; }
+  .telecharger .corps, .etapes { grid-template-columns: 1fr; }
+  .acte .texte { margin: auto auto 11vh; }
+  .acte p { font-size: 1.05rem; }
+  .acte .lieu { display: none; }
+  .acte h3 { margin-bottom: 1.4rem; }
+  .carte-acte { top: 8vh; left: var(--gouttiere); right: var(--gouttiere); width: auto; transform: none; padding: 16px 18px; }
+  .carte-acte figcaption { display: none; }
+  .carte-acte blockquote { margin-top: 0; font-size: 1.15rem; }
+  .carte-acte .pied-carte { margin-top: 12px; }
+  .faits { gap: 16px; margin-top: 1.2rem; }
+  .acte .numeral { font-size: 62vh; bottom: auto; top: 6vh; }
+  .defilez { display: none; }
+  .enseigne { font-size: min(16cqi, 22vh); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+  .actes { height: auto; } .collant { position: static; height: auto; } .chemin { flex-direction: column; } .acte { height: 100svh; } .jalons { display: none; }
+  .js .monte, .js .enseigne span, .js .presente, .js .sous, .js .pied-affiche, .js .barre, .js .replique .mot { opacity: 1; transform: none; filter: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="seuil" id="seuil" role="dialog" aria-modal="true" aria-labelledby="seuil-titre">
+  <div class="accueil">
+    <div class="dixhuit" aria-hidden="true">18+</div>
+    <p id="seuil-titre">Ce soir, la maison ne reçoit que les grandes personnes. Avez-vous dix-huit ans révolus&nbsp;?</p>
+    <div class="choix">
+      <button class="bouton neon" id="majeur" type="button">Oui, entrons</button>
+      <button class="bouton fil" id="mineur" type="button">Pas encore</button>
+    </div>
+  </div>
+  <div class="refus">
+    <div class="dixhuit" aria-hidden="true">18+</div>
+    <p>La maison vous attendra. Revenez le soir de vos dix-huit ans&nbsp;: nous garderons votre table.</p>
+  </div>
+</div>
+
+<main>
+
+<!-- ============================ L'affiche ============================ -->
+<header class="affiche" id="affiche">
+  <div class="fumee a"></div><div class="fumee b"></div><div class="fumee c"></div>
+  <div class="bokeh" id="bokeh" aria-hidden="true"></div>
+  <div class="lumiere"></div>
+
+  <div class="barre">
+    <span class="marque">KARGLASS</span>
+    <a class="bouton fil" href="#telecharger">Télécharger</a>
+  </div>
+
+  <div class="enseigne-cadre">
+    <div class="halo-enseigne"></div>
+    <p class="presente">Karglass présente</p>
+    <h1 class="enseigne" id="enseigne" aria-label="Effeuille-Moi">Effeuille-Moi</h1>
+    <p class="sous">Cabaret <b>✦</b> une revue pour deux <b>✦</b> trois actes</p>
+  </div>
+
+  <div class="pied-affiche">
+    <p class="accroche">Un jeu de soirée pour les couples, <b>sur un seul téléphone</b> : de l'effeuillage à la scène après minuit.</p>
+    <a class="bouton neon aimant" href="#telecharger">Télécharger l'APK <span class="fleche">↓</span></a>
+    <span class="defilez"><span></span>Défilez</span>
+  </div>
+</header>
+
+<!-- ============================ Les bandeaux ============================ -->
+<section class="bandeaux" aria-label="En bref">
+  <div class="ruban rose" data-ruban="1"><div class="piste"><span>Une revue pour deux ✦</span><span><em>trois actes</em> ✦</span><span>Un seul téléphone ✦</span><span><em>hors ligne</em> ✦</span><span>Réservé aux adultes ✦</span></div></div>
+  <div class="ruban laiton" data-ruban="-1"><div class="piste"><span>On vous vouvoie ✦</span><span><em>le jeu propose, vous disposez</em> ✦</span><span>Android ✦</span><span><em>gratuit</em> ✦</span><span>Une production Karglass ✦</span></div></div>
+</section>
+
+<!-- ============================ Les trois actes ============================ -->
+<section class="actes" id="actes" aria-label="Les trois actes">
+  <div class="collant">
+    <div class="chemin" id="chemin">
+      <article class="acte i">
+        <div class="ambiance"></div><div class="lampes"></div>
+        <span class="numeral" aria-hidden="true">I</span>
+        <figure class="carte-acte">
+          <figcaption>Une carte du premier acte</figcaption>
+          <blockquote>Mademoiselle retirera ses bas, lentement, sans quitter Monsieur des yeux.</blockquote>
+          <div class="pied-carte"><span class="pastille">Pour elle</span><span class="pastille laiton">Tour 3</span></div>
+        </figure>
+        <div class="texte">
+          <span class="surtitre">Premier acte</span>
+          <h3>L'<b>effeuillage</b></h3>
+          <p>Le jeu connaît vos tenues, pièce par pièce. Chacun ôte un vêtement à son tour, à la manière dictée. L'acte finit quand il n'y a plus rien à retirer.</p>
+          <dl class="faits">
+            <div><dt>8</dt><dd>tenues préréglées, retouchables</dd></div>
+            <div><dt>56</dt><dd>manières de se dévêtir</dd></div>
+            <div><dt>1</dt><dd>règle : les dessous en dernier</dd></div>
+          </dl>
+          <span class="lieu">À table, dans la salle</span>
+        </div>
+      </article>
+      <article class="acte ii">
+        <div class="ambiance"></div><div class="flamme a"></div><div class="flamme b"></div>
+        <span class="numeral" aria-hidden="true">II</span>
+        <figure class="carte-acte">
+          <figcaption>Une carte du deuxième acte</figcaption>
+          <blockquote>Monsieur, déposez des baisers dans le cou de Mademoiselle, et prenez tout votre temps.</blockquote>
+          <div class="pied-carte"><span class="pastille">Pour lui</span><span class="pastille laiton">Minuteur · 1 min</span></div>
+        </figure>
+        <div class="texte">
+          <span class="surtitre">Deuxième acte</span>
+          <h3>Les <b>préliminaires</b></h3>
+          <p>Une tenture se relève, le velours change de couleur. Des cartes écrites pour lui, d'autres pour elle ; certaines se jouent au minuteur.</p>
+          <dl class="faits">
+            <div><dt>60</dt><dd>cartes, pour lui ou pour elle</dd></div>
+            <div><dt>10</dt><dd>tours, réglables de 5 à 20</dd></div>
+            <div><dt>1 min</dt><dd>au minuteur, qui sonne tout seul</dd></div>
+          </dl>
+          <span class="lieu">Au salon particulier</span>
+        </div>
+      </article>
+      <article class="acte iii">
+        <div class="ambiance"></div><div class="faisceau"><i></i></div><div class="tache"></div>
+        <span class="numeral" aria-hidden="true">III</span>
+        <figure class="carte-acte">
+          <figcaption>Une carte du troisième acte</figcaption>
+          <blockquote class="flou" aria-hidden="true">Ce qui se dit sur la scène reste sur la scène, et ne s'écrit pas sur un site.</blockquote>
+          <span class="tampon">Réservé à la scène</span>
+          <div class="pied-carte flou" aria-hidden="true"><span class="pastille">Pour elle</span><span class="pastille laiton">Tour 7</span></div>
+        </figure>
+        <div class="texte">
+          <span class="surtitre">Troisième acte</span>
+          <h3>La <b>scène</b></h3>
+          <p>Le public est parti, la poursuite n'éclaire plus que vous. L'acte le plus franc — celui où, si tout va bien, le téléphone reste oublié sur la table.</p>
+          <dl class="faits">
+            <div><dt>60</dt><dd>cartes, les plus franches</dd></div>
+            <div><dt>10</dt><dd>tours, réglables de 5 à 20</dd></div>
+            <div><dt>10</dt><dd>gages pour clore la soirée</dd></div>
+          </dl>
+          <span class="lieu">Après la fermeture</span>
+        </div>
+      </article>
+    </div>
+    <div class="jalons" aria-hidden="true"><b data-jalon>I</b><span class="rail"><i id="rail"></i></span><b data-jalon>II</b><span class="rail"><i id="rail2"></i></span><b data-jalon>III</b></div>
+  </div>
+</section>
+
+<!-- ============================ Le manifeste ============================ -->
+<section class="manifeste" aria-label="L'esprit du jeu">
+  <p data-remplit>Le jeu <span class="n">propose.</span></p>
+  <p data-remplit>Vous <span class="n">disposez.</span></p>
+  <p data-remplit>Et le téléphone finit oublié sur la table.</p>
+</section>
+
+<!-- ============================ Les chiffres ============================ -->
+<section class="chiffres" aria-labelledby="chiffres-titre">
+  <div class="entete monte">
+    <h2 id="chiffres-titre">La carte de la maison</h2>
+    <span class="surtitre">Les règles, en six chiffres</span>
+  </div>
+  <div class="grille">
+    <div class="case large monte"><span class="nombre" data-compte="190">0</span><div><h3>Cartes livrées</h3><p>Écrites pour lui, pour elle, toujours vouvoyées. Exportez-les, réécrivez-les sur ordinateur, rapportez-les dans le jeu.</p></div></div>
+    <div class="case monte"><span class="nombre" data-compte="1">0</span><div><h3>Téléphone</h3><p>Posé entre vous, couché, passé de main en main.</p></div></div>
+    <div class="case monte"><span class="nombre" data-compte="0">0</span><div><h3>Réseau, compte, caméra</h3><p>Le jeu fonctionne en mode avion. Rien ne quitte le téléphone.</p></div></div>
+    <div class="case monte"><span class="nombre">1<small>/6</small></span><div><h3>Un shot, au hasard</h3><p>En moyenne un tour sur six — ou jamais, au choix.</p></div></div>
+    <div class="case monte"><span class="nombre" data-compte="1">0</span><div><h3>Bouton pour passer</h3><p>Toujours à portée, pour l'un comme pour l'autre : il clôt l'acte.</p></div></div>
+    <div class="case bande monte"><span class="nombre" data-compte="1">0</span><div><h3>Gage final</h3><p>Pour celui qui s'est le plus dégonflé. À égalité, le sort tranche.</p></div></div>
+  </div>
+</section>
+
+<!-- ============================ Le ton ============================ -->
+<section class="ton" aria-labelledby="ton-titre">
+  <span class="surtitre" id="ton-titre">Le ton de la maison</span>
+  <p class="replique" id="replique" aria-live="polite">Mademoiselle retirera ses bas, lentement.</p>
+  <span class="qui" id="qui">Premier acte</span>
+  <div class="points" id="points" aria-hidden="true"></div>
+</section>
+
+<!-- ============================ Télécharger ============================ -->
+<section class="telecharger" id="telecharger" aria-labelledby="telecharger-titre">
+  <div class="defile" data-ruban="-1.6" aria-hidden="true"><div class="piste"><span>Télécharger ✦</span><span>Télécharger ✦</span></div></div>
+  <div class="corps">
+    <div class="monte">
+      <span class="surtitre">Le vestiaire</span>
+      <h2 id="telecharger-titre">Votre <b>billet</b>, pour deux.</h2>
+    </div>
+    <div class="fiche monte">
+      <dl class="details">
+        <div><dt>Version</dt><dd>0.1</dd></div>
+        <div><dt>Android</dt><dd>7.0 et plus</dd></div>
+        <div><dt>Fichier</dt><dd>APK</dd></div>
+        <div><dt>Prix</dt><dd>Offert</dd></div>
+      </dl>
+      <!-- Lien à remplacer par l'adresse réelle de l'APK publié. -->
+      <a class="bouton neon aimant" href="effeuille-moi-0.1.apk" download>Télécharger l'APK <span class="fleche">↓</span></a>
+    </div>
+  </div>
+  <ol class="etapes">
+    <li class="monte"><b>Téléchargez</b>depuis votre téléphone : le fichier arrive dans vos téléchargements.</li>
+    <li class="monte"><b>Autorisez</b>l'installation depuis votre navigateur quand Android le demande.</li>
+    <li class="monte"><b>Installez</b>puis cherchez la fermeture éclair sur l'écran d'accueil.</li>
+  </ol>
+  <p class="note">Effeuille-Moi ne passe pas par les boutiques d'applications. Pour une mise à jour, installez la nouvelle version par-dessus l'ancienne : vos prénoms et réglages sont gardés ; exportez d'abord vos propres cartes.</p>
+</section>
+
+</main>
+
+<footer>
+  <p class="production">Une production</p>
+  <span class="studio" id="studio">KARGLASS</span>
+  <div class="legal">
+    <p>Effeuille-Moi est un jeu pour adultes consentants : chacun peut refuser une carte ou arrêter la partie à tout moment. L'abus d'alcool est dangereux pour la santé, à consommer avec modération — le jeu se joue aussi sans shots.</p>
+    <p>© 2026 Karglass</p>
+  </div>
+</footer>
+
+<div class="anneau" id="anneau" aria-hidden="true"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const reduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const souris = matchMedia("(pointer: fine)").matches;
+  const borne = (v, a, b) => Math.min(b, Math.max(a, v));
+  const hasard = (a, b) => a + Math.random() * (b - a);
+
+  // L'enseigne : une lettre par tube, deux tubes capricieux.
+  const enseigne = $("enseigne");
+  enseigne.innerHTML = [...enseigne.textContent].map((c, i) =>
+    `<span aria-hidden="true" style="--i:${i}"${i === 3 || i === 10 ? ' class="caprice"' : ""}>${c}</span>`).join("");
+
+  // Le bokeh : des lumières hors de mise au point, comme vues à travers un verre.
+  const teintes = ["--ampoule", "--neon", "--laiton-clair", "--ambre"].map((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim());
+  $("bokeh").innerHTML = Array.from({ length: 38 }, () => {
+    const t = hasard(12, 140), c = teintes[(Math.random() * teintes.length) | 0];
+    return `<i style="width:${t}px;height:${t}px;left:${hasard(0, 100)}%;top:${hasard(0, 100)}%;` +
+      `background:radial-gradient(circle, ${c} 0 35%, transparent 70%);opacity:${hasard(.18, .6).toFixed(2)};` +
+      `filter:blur(${hasard(1, 9).toFixed(1)}px);--t:${hasard(8, 20).toFixed(1)}s;--dx:${hasard(-60, 60) | 0}px;--dy:${hasard(-50, 50) | 0}px"></i>`;
+  }).join("");
+
+  // Le seuil : une fois par visite, puis l'iris se referme.
+  const seuil = $("seuil");
+  const entrer = () => document.body.classList.add("pret");
+  let deja = false;
+  try { deja = sessionStorage.getItem("effeuille-majeur") === "oui"; } catch (e) {}
+  if (deja) { seuil.classList.add("cache"); entrer(); }
+  else {
+    $("majeur").focus();
+    $("majeur").addEventListener("click", () => {
+      try { sessionStorage.setItem("effeuille-majeur", "oui"); } catch (e) {}
+      seuil.classList.add("parti");
+      setTimeout(entrer, reduit ? 0 : 500);
+      setTimeout(() => seuil.classList.add("cache"), reduit ? 0 : 1500);
+    });
+    $("mineur").addEventListener("click", () => seuil.classList.add("refuse"));
+  }
+
+  // Apparitions et compteurs.
+  document.querySelectorAll(".grille, .etapes").forEach((g) => [...g.children].forEach((el, n) => el.style.setProperty("--d", `${n * .1}s`)));
+  const compter = (el) => {
+    const fin = +el.dataset.compte, debut = performance.now();
+    if (reduit || fin === 0) { el.textContent = fin; return; }
+    const pas = (t) => {
+      const p = borne((t - debut) / 1600, 0, 1);
+      el.textContent = Math.round(fin * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(pas);
+    };
+    requestAnimationFrame(pas);
+  };
+  const obs = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add("vu");
+    e.target.querySelectorAll("[data-compte]").forEach(compter);
+    obs.unobserve(e.target);
+  }), { threshold: .2 });
+  document.querySelectorAll(".monte").forEach((el) => obs.observe(el));
+
+  // Les cases : un reflet suit le pointeur.
+  document.querySelectorAll(".case").forEach((c) => c.addEventListener("pointermove", (e) => {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty("--x", `${e.clientX - r.left}px`);
+    c.style.setProperty("--y", `${e.clientY - r.top}px`);
+  }));
+
+  // Le ton : une réplique à la fois.
+  const repliques = [
+    ["Mademoiselle retirera ses bas, lentement.", "Premier acte"],
+    ["Monsieur ôtera sa chemise, bouton après bouton, sans quitter Mademoiselle des yeux.", "Premier acte"],
+    ["Trinquez : un shot chacun, sans vous quitter des yeux.", "Un shot"],
+    ["Vous offrirez à votre partenaire un massage complet, de la nuque aux chevilles.", "Le gage"],
+  ];
+  const replique = $("replique"), qui = $("qui"), points = $("points");
+  points.innerHTML = repliques.map(() => "<i></i>").join("");
+  let r = 0;
+  const montrer = () => {
+    replique.innerHTML = repliques[r][0].split(" ").map((m, i) => `<span class="mot" style="--i:${i}">${m} </span>`).join("");
+    qui.textContent = repliques[r][1];
+    [...points.children].forEach((p, i) => p.classList.toggle("actif", i === r));
+    replique.classList.remove("sort");
+    void replique.offsetWidth;
+    replique.classList.add("entre");
+  };
+  montrer();
+  if (!reduit) setInterval(() => {
+    replique.classList.replace("entre", "sort");
+    setTimeout(() => { r = (r + 1) % repliques.length; montrer(); }, 700);
+  }, 5200);
+
+  if (reduit) return;
+
+  // La poursuite de l'affiche : elle suit le pointeur, ou rôde seule quand personne ne la guide.
+  const affiche = $("affiche");
+  let cibleX = .5, cibleY = .45, x = .5, y = .45, guide = 0;
+  affiche.addEventListener("pointermove", (e) => {
+    const b = affiche.getBoundingClientRect();
+    cibleX = (e.clientX - b.left) / b.width; cibleY = (e.clientY - b.top) / b.height;
+    guide = performance.now();
+  });
+
+  // Les boutons-aimants : ils viennent un peu au-devant du doigt.
+  document.querySelectorAll(".aimant").forEach((b) => {
+    b.addEventListener("pointermove", (e) => {
+      const r = b.getBoundingClientRect();
+      b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .25}px, ${(e.clientY - r.top - r.height / 2) * .35}px)`;
+    });
+    b.addEventListener("pointerleave", () => { b.style.transform = ""; });
+  });
+
+  // L'anneau du curseur.
+  const anneau = $("anneau");
+  let ax = 0, ay = 0, sx = 0, sy = 0;
+  if (souris) {
+    addEventListener("pointermove", (e) => { sx = e.clientX; sy = e.clientY; anneau.classList.add("vu"); });
+    document.querySelectorAll("a, button, .case").forEach((el) => {
+      el.addEventListener("pointerenter", () => anneau.classList.add("gros"));
+      el.addEventListener("pointerleave", () => anneau.classList.remove("gros"));
+    });
+  }
+
+  // Une seule boucle pour tout ce que le défilement pilote.
+  const rubans = [...document.querySelectorAll("[data-ruban]")].map((el) => ({ el, piste: el.querySelector(".piste"), sens: +el.dataset.ruban, pos: 0 }));
+  rubans.forEach((rb) => rb.el.appendChild(rb.piste.cloneNode(true)));
+  const actes = $("actes"), chemin = $("chemin"), rail = $("rail"), rail2 = $("rail2");
+  const numeraux = [...document.querySelectorAll(".acte .numeral")];
+  const cartes = [...document.querySelectorAll(".carte-acte")];
+  const jalons = [...document.querySelectorAll("[data-jalon]")];
+  const remplis = [...document.querySelectorAll("[data-remplit]")];
+  const studio = $("studio");
+  let dernierY = scrollY, vitesse = 0, avant = performance.now();
+
+  const boucle = (t) => {
+    const dt = Math.min(64, t - avant); avant = t;
+    const h = innerHeight;
+
+    // la poursuite
+    if (t - guide > 2500) {
+      cibleX = .5 + Math.sin(t / 2600) * .32;
+      cibleY = .46 + Math.sin(t / 1900) * .18;
+    }
+    x += (cibleX - x) * .06; y += (cibleY - y) * .06;
+    affiche.style.setProperty("--mx", `${(x * 100).toFixed(2)}%`);
+    affiche.style.setProperty("--my", `${(y * 100).toFixed(2)}%`);
+
+    // les rubans : vitesse de base, plus l'élan du défilement
+    const dy = scrollY - dernierY; dernierY = scrollY;
+    vitesse += (Math.abs(dy) * 1.4 - vitesse) * .08;
+    rubans.forEach((rb) => {
+      const largeur = rb.piste.offsetWidth;
+      rb.pos = (rb.pos + rb.sens * (0.06 * dt + vitesse * .6)) % largeur;
+      const decal = rb.sens > 0 ? -largeur + ((rb.pos % largeur) + largeur) % largeur : -(((-rb.pos) % largeur) + largeur) % largeur;
+      [...rb.el.children].forEach((p) => { p.style.transform = `translateX(${decal}px)`; });
+    });
+
+    // les trois actes : la page descend, la scène glisse de côté
+    const b = actes.getBoundingClientRect();
+    const course = actes.offsetHeight - h;
+    const p = borne(-b.top / course, 0, 1);
+    const n = numeraux.length - 1;
+    chemin.style.transform = `translateX(${-p * n * innerWidth}px)`;
+    numeraux.forEach((el, i) => { el.style.transform = `translateX(${(p * n - i) * 35}vw)`; });
+    cartes.forEach((el, i) => { el.style.translate = `${(p * n - i) * 16}vw 0`; });
+    rail.style.setProperty("--p", `${borne(p * 2, 0, 1) * 100}%`);
+    rail2.style.setProperty("--p", `${borne(p * 2 - 1, 0, 1) * 100}%`);
+    jalons.forEach((j, i) => j.classList.toggle("actif", Math.round(p * n) === i));
+
+    // le manifeste et la signature se remplissent de lumière
+    remplis.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--p", `${borne((h * .85 - r.top) / (h * .45), 0, 1) * 100}%`);
+    });
+    const rs = studio.getBoundingClientRect();
+    // la signature s'illumine de son entrée dans l'écran jusqu'au bas de la page, où elle est pleine
+    const reste = document.documentElement.scrollHeight - h - scrollY;
+    studio.style.setProperty("--p", `${borne((h - rs.top) / Math.max(1, h - (rs.top + reste)), 0, 1) * 100}%`);
+
+    // l'anneau
+    if (souris) {
+      ax += (sx - ax) * .18; ay += (sy - ay) * .18;
+      anneau.style.transform = `translate(${ax}px, ${ay}px)`;
+    }
+    requestAnimationFrame(boucle);
+  };
+  requestAnimationFrame(boucle);
+})();
+</script>
+</body>
+</html>
