@@ -3,14 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Effeuille-Moi — le site, version affiche</title>
+<title>Effeuille-Moi — le site, version affiche (bis)</title>
 <meta name="description" content="Effeuille-Moi, un jeu Android pour deux, un soir : une revue en trois actes, de l'effeuillage à la scène après minuit. Une production Karglass.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500;1,600&family=Josefin+Sans:wght@400;600;700&family=Sacramento&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add("js");</script>
 <style>
-/* Maquette du site de promotion, troisième version : une affiche qui bouge plutôt qu'un
+/* Maquette du site de promotion, version 3 bis : la troisième, retouchée pour décrire le jeu
+   tel qu'il est aujourd'hui, questions intimes comprises (spec 0004). Le site n'ayant jamais
+   été publié, rien n'y est présenté comme « nouveau » : les questions font partie du jeu.
+   Troisième version : une affiche qui bouge plutôt qu'un
    décor dessiné. Aucune illustration : de la typographie à très grande échelle, de la
    lumière floue (bokeh, fumée, poursuite), du grain de pellicule, et le défilement qui
    pilote le mouvement. Mêmes couleurs et mêmes trois voix que cabaret-3.html. */
@@ -46,6 +49,7 @@
   --poursuite: rgba(255, 226, 190, .16);
   --ombre-forte: rgba(0, 0, 0, .7);
   --vitre: rgba(14, 4, 7, .55);
+  --papier: #f3e6d2; --papier-ombre: #d9c4a6; --papier-encre: #2a0b10; --papier-encre-douce: #6b3a36;
 
   --f-neon: "Sacramento", cursive;
   --f-voix: "Cormorant Garamond", Garamond, serif;
@@ -376,6 +380,71 @@ footer .studio {
 footer .legal { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: .8rem; color: var(--encre-faible); border-top: 1px solid var(--trait); padding-top: 24px; }
 footer .legal p { max-width: 70ch; }
 
+/* ======================================================================
+   Version 3 bis : les questions, partie du jeu
+   ====================================================================== */
+/* dans les deux premiers actes, une question crème glisse sous la carte d'action */
+.carte-question {
+  position: absolute; z-index: 1; left: calc(clamp(16px, 8vw, 150px) + min(210px, 17vw)); top: calc(50% + 120px); width: min(330px, 27vw);
+  padding: 22px 24px 20px; border-radius: var(--r-3); color: var(--papier-encre);
+  background: linear-gradient(160deg, var(--papier), var(--papier-ombre)); box-shadow: 0 40px 80px var(--ombre-forte);
+  rotate: 4deg; animation: balance 8s ease-in-out infinite -3s; will-change: translate;
+}
+.acte.ii .carte-question { rotate: -3deg; animation-delay: -5s; }
+.case.gage { grid-column: span 2; }
+.carte-question::before { content: "?"; position: absolute; top: 2px; right: 16px; font-family: var(--f-neon); font-size: 2.6rem; color: var(--velours); opacity: .55; }
+.carte-question figcaption { font-weight: 600; font-size: .66rem; letter-spacing: .28em; text-transform: uppercase; color: var(--velours); }
+.carte-question blockquote { margin-top: 10px; font-family: var(--f-voix); font-style: italic; font-size: clamp(1.1rem, 1.5vw, 1.35rem); line-height: 1.3; }
+
+/* « Entre deux gestes » : la section des questions */
+.entre-gestes { position: relative; min-height: 100svh; padding: 16vh var(--gouttiere); overflow: hidden; isolation: isolate; display: grid; align-items: center;
+  background: radial-gradient(60% 70% at 25% 50%, var(--velours-sombre), var(--fond-page) 72%); }
+.entre-gestes .point {
+  position: absolute; z-index: -1; left: 4vw; top: 0; bottom: 0; display: flex; align-items: center;
+  font-family: var(--f-neon); font-size: min(78vh, 52vw); line-height: 1.25; color: transparent;
+  -webkit-text-stroke: 2px var(--neon); filter: drop-shadow(0 0 18px var(--neon-halo)); opacity: .35;
+}
+.entre-gestes .point.vu { animation: tube 1.4s steps(1) both, souffle 5s ease-in-out infinite 1.4s; }
+@keyframes souffle { 50% { opacity: .55; filter: drop-shadow(0 0 30px var(--neon)); } }
+.entre-gestes .corps { margin-left: auto; width: min(700px, 100%); }
+.entre-gestes h2 { font-family: var(--f-voix); font-style: italic; font-weight: 500; font-size: clamp(3rem, 7.5vw, 6.8rem); line-height: .95; letter-spacing: -.03em; margin: .8rem 0 1.4rem; }
+.entre-gestes h2 b { font-family: var(--f-neon); font-weight: 400; font-style: normal; letter-spacing: 0; color: var(--neon-coeur); text-shadow: 0 0 14px var(--neon), 0 0 40px var(--neon-halo); }
+.entre-gestes .chapeau { font-family: var(--f-voix); font-size: clamp(1.15rem, 1.8vw, 1.45rem); line-height: 1.45; color: var(--encre-douce); max-width: 38ch; }
+.pile { position: relative; height: 210px; margin: 3rem 0 2.6rem; perspective: 1200px; }
+.pile figure {
+  position: absolute; inset: 0; max-width: 520px; padding: 30px 34px; border-radius: var(--r-3); color: var(--papier-encre);
+  background: linear-gradient(160deg, var(--papier), var(--papier-ombre)); box-shadow: 0 40px 90px var(--ombre-forte);
+  display: grid; align-content: center; transform-origin: 50% 120%;
+  transition: transform 1.1s var(--sortie), opacity .8s;
+}
+.pile figure::before { content: "?"; position: absolute; top: 4px; right: 20px; font-family: var(--f-neon); font-size: 3rem; color: var(--velours); opacity: .5; }
+.pile figcaption { font-weight: 600; font-size: .7rem; letter-spacing: .28em; text-transform: uppercase; color: var(--velours); }
+.pile blockquote { margin-top: 12px; font-family: var(--f-voix); font-style: italic; font-size: clamp(1.3rem, 2.2vw, 1.75rem); line-height: 1.3; }
+.pile figure[data-rang="0"] { transform: none; z-index: 3; }
+.pile figure[data-rang="1"] { transform: translate(18px, 14px) rotate(3deg); z-index: 2; opacity: .85; }
+.pile figure[data-rang="2"] { transform: translate(34px, 26px) rotate(6deg); z-index: 1; opacity: .6; }
+.pile figure[data-rang="3"] { transform: translate(46px, 36px) rotate(8deg); z-index: 0; opacity: 0; }
+.pile figure.part { transform: translate(-60%, -20px) rotate(-14deg); opacity: 0; z-index: 4; }
+.reglages-questions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; border-top: 1px solid var(--trait); padding-top: 22px; }
+.reglages-questions dt { font-family: var(--f-ui); font-weight: 700; font-size: clamp(1.6rem, 2.6vw, 2.4rem); line-height: 1; color: var(--neon-coeur); text-shadow: 0 0 18px var(--neon-voile); }
+.reglages-questions dd { margin-top: 8px; font-size: .7rem; font-weight: 600; letter-spacing: .14em; line-height: 1.5; text-transform: uppercase; color: var(--encre-douce); }
+.entre-gestes .garde { margin-top: 2rem; font-family: var(--f-voix); font-style: italic; font-size: 1.1rem; color: var(--encre-faible); max-width: 46ch; }
+
+/* le ton : une question s'y glisse, sur papier crème */
+.ton.question-en-cours .replique { color: var(--papier); text-shadow: 0 0 30px rgba(243, 230, 210, .25); }
+.ton .qui.est-question { color: var(--neon-coeur); }
+
+@media (max-width: 860px) {
+  .carte-question { display: none; }
+  .case.gage { grid-column: auto; }
+  .entre-gestes .point { display: none; }
+  .reglages-questions { grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .pile { height: 250px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pile figure[data-rang="1"], .pile figure[data-rang="2"] { display: none; }
+}
+
 /* ---------- Le curseur : une poursuite miniature (souris seulement) ---------- */
 .anneau { position: fixed; z-index: 95; left: 0; top: 0; width: 38px; height: 38px; margin: -19px 0 0 -19px; border: 1px solid var(--neon); border-radius: 50%; pointer-events: none;
   opacity: 0; transition: width .35s var(--sortie), height .35s var(--sortie), margin .35s var(--sortie), background .35s, opacity .3s; mix-blend-mode: screen; }
@@ -451,7 +520,7 @@ footer .legal p { max-width: 70ch; }
   </div>
 
   <div class="pied-affiche">
-    <p class="accroche">Un jeu de soirée pour les couples, <b>sur un seul téléphone</b> : de l'effeuillage à la scène après minuit.</p>
+    <p class="accroche">Un jeu de soirée pour les couples, <b>sur un seul téléphone</b> : des gestes, des questions qu'on n'ose pas se poser, de l'effeuillage à la scène après minuit.</p>
     <a class="bouton neon aimant" href="#telecharger">Télécharger l'APK <span class="fleche">↓</span></a>
     <span class="defilez"><span></span>Défilez</span>
   </div>
@@ -459,8 +528,8 @@ footer .legal p { max-width: 70ch; }
 
 <!-- ============================ Les bandeaux ============================ -->
 <section class="bandeaux" aria-label="En bref">
-  <div class="ruban rose" data-ruban="1"><div class="piste"><span>Une revue pour deux ✦</span><span><em>trois actes</em> ✦</span><span>Un seul téléphone ✦</span><span><em>hors ligne</em> ✦</span><span>Réservé aux adultes ✦</span></div></div>
-  <div class="ruban laiton" data-ruban="-1"><div class="piste"><span>On vous vouvoie ✦</span><span><em>le jeu propose, vous disposez</em> ✦</span><span>Android ✦</span><span><em>gratuit</em> ✦</span><span>Une production Karglass ✦</span></div></div>
+  <div class="ruban rose" data-ruban="1"><div class="piste"><span>Une revue pour deux ✦</span><span><em>trois actes</em> ✦</span><span>Un seul téléphone ✦</span><span><em>des questions intimes</em> ✦</span><span><em>hors ligne</em> ✦</span><span>Réservé aux adultes ✦</span></div></div>
+  <div class="ruban laiton" data-ruban="-1"><div class="piste"><span>On vous vouvoie ✦</span><span><em>le jeu propose, vous disposez</em> ✦</span><span>On se parle, enfin ✦</span><span>Android ✦</span><span><em>gratuit</em> ✦</span><span>Une production Karglass ✦</span></div></div>
 </section>
 
 <!-- ============================ Les trois actes ============================ -->
@@ -475,14 +544,18 @@ footer .legal p { max-width: 70ch; }
           <blockquote>Mademoiselle retirera ses bas, lentement, sans quitter Monsieur des yeux.</blockquote>
           <div class="pied-carte"><span class="pastille">Pour elle</span><span class="pastille laiton">Tour 3</span></div>
         </figure>
+        <figure class="carte-question" aria-label="Une question du premier acte">
+          <figcaption>Une question pour Monsieur</figcaption>
+          <blockquote>Pour faire l'amour, préférez-vous la lumière, la flamme d'une bougie, ou le noir complet&nbsp;?</blockquote>
+        </figure>
         <div class="texte">
           <span class="surtitre">Premier acte</span>
           <h3>L'<b>effeuillage</b></h3>
-          <p>Le jeu connaît vos tenues, pièce par pièce. Chacun ôte un vêtement à son tour, à la manière dictée. L'acte finit quand il n'y a plus rien à retirer.</p>
+          <p>Le jeu connaît vos tenues, pièce par pièce. Chacun ôte un vêtement à son tour, à la manière dictée ; parfois, une question s'invite à la place. L'acte finit quand il n'y a plus rien à retirer.</p>
           <dl class="faits">
             <div><dt>8</dt><dd>tenues préréglées, retouchables</dd></div>
             <div><dt>56</dt><dd>manières de se dévêtir</dd></div>
-            <div><dt>1</dt><dd>règle : les dessous en dernier</dd></div>
+            <div><dt>20</dt><dd>questions, les plus douces</dd></div>
           </dl>
           <span class="lieu">À table, dans la salle</span>
         </div>
@@ -495,13 +568,17 @@ footer .legal p { max-width: 70ch; }
           <blockquote>Monsieur, déposez des baisers dans le cou de Mademoiselle, et prenez tout votre temps.</blockquote>
           <div class="pied-carte"><span class="pastille">Pour lui</span><span class="pastille laiton">Minuteur · 1 min</span></div>
         </figure>
+        <figure class="carte-question" aria-label="Une question du deuxième acte">
+          <figcaption>Une question pour Mademoiselle</figcaption>
+          <blockquote>Qu'avez-vous toujours voulu essayer, sans jamais oser le demander&nbsp;?</blockquote>
+        </figure>
         <div class="texte">
           <span class="surtitre">Deuxième acte</span>
           <h3>Les <b>préliminaires</b></h3>
-          <p>Une tenture se relève, le velours change de couleur. Des cartes écrites pour lui, d'autres pour elle ; certaines se jouent au minuteur.</p>
+          <p>Une tenture se relève, le velours change de couleur. Des cartes écrites pour lui, d'autres pour elle ; certaines se jouent au minuteur, et les questions s'y font plus troublantes.</p>
           <dl class="faits">
             <div><dt>60</dt><dd>cartes, pour lui ou pour elle</dd></div>
-            <div><dt>10</dt><dd>tours, réglables de 5 à 20</dd></div>
+            <div><dt>20</dt><dd>questions, plus troublantes</dd></div>
             <div><dt>1 min</dt><dd>au minuteur, qui sonne tout seul</dd></div>
           </dl>
           <span class="lieu">Au salon particulier</span>
@@ -533,10 +610,33 @@ footer .legal p { max-width: 70ch; }
   </div>
 </section>
 
+<!-- ============================ Entre deux gestes ============================ -->
+<section class="entre-gestes" id="questions" aria-labelledby="questions-titre">
+  <span class="point monte" aria-hidden="true">?</span>
+  <div class="corps">
+    <span class="surtitre monte">Entre deux gestes</span>
+    <h2 id="questions-titre" class="monte">Des <b>questions</b> qu'on n'ose pas se poser</h2>
+    <p class="chapeau monte">Pendant l'effeuillage et les préliminaires, le hasard glisse parfois une question à la place de l'action. On répond, on en parle si l'envie vient, et l'on apprend sur l'autre ce qu'on n'avait jamais osé demander.</p>
+    <div class="pile monte" id="pile" aria-live="polite">
+      <figure data-rang="0"><figcaption>Une question pour Mademoiselle</figcaption><blockquote>Quel compliment sur votre corps aimeriez-vous entendre plus souvent&nbsp;?</blockquote></figure>
+      <figure data-rang="1"><figcaption>Une question pour Monsieur</figcaption><blockquote>Quand Mademoiselle entre dans une pièce, où se pose d'abord votre regard&nbsp;?</blockquote></figure>
+      <figure data-rang="2"><figcaption>Une question pour vous deux</figcaption><blockquote>Préférez-vous la lenteur qui fait languir, ou l'impatience qui emporte tout&nbsp;?</blockquote></figure>
+      <figure data-rang="3"><figcaption>Une question pour Mademoiselle</figcaption><blockquote>Où aimez-vous être embrassée, en dehors de la bouche&nbsp;?</blockquote></figure>
+    </div>
+    <dl class="reglages-questions monte">
+      <div><dt>1/4</dt><dd>une question tous les quatre tours, réglable — ou jamais</dd></div>
+      <div><dt>40</dt><dd>questions, pour lui, pour elle ou pour les deux</dd></div>
+      <div><dt>0</dt><dd>prix pour un « non » ; refuser coûte comme une carte</dd></div>
+    </dl>
+    <p class="garde monte">Personne ne choisit entre une action et une question&nbsp;: le jeu décide, et la question reste l'exception. Le désir, le corps, les fantasmes — jamais le passé.</p>
+  </div>
+</section>
+
 <!-- ============================ Le manifeste ============================ -->
 <section class="manifeste" aria-label="L'esprit du jeu">
   <p data-remplit>Le jeu <span class="n">propose.</span></p>
   <p data-remplit>Vous <span class="n">disposez.</span></p>
+  <p data-remplit>On se parle, <span class="n">enfin.</span></p>
   <p data-remplit>Et le téléphone finit oublié sur la table.</p>
 </section>
 
@@ -544,15 +644,16 @@ footer .legal p { max-width: 70ch; }
 <section class="chiffres" aria-labelledby="chiffres-titre">
   <div class="entete monte">
     <h2 id="chiffres-titre">La carte de la maison</h2>
-    <span class="surtitre">Les règles, en six chiffres</span>
+    <span class="surtitre">Les règles, en sept chiffres</span>
   </div>
   <div class="grille">
-    <div class="case large monte"><span class="nombre" data-compte="190">0</span><div><h3>Cartes livrées</h3><p>Écrites pour lui, pour elle, toujours vouvoyées. Exportez-les, réécrivez-les sur ordinateur, rapportez-les dans le jeu.</p></div></div>
+    <div class="case large monte"><span class="nombre" data-compte="230">0</span><div><h3>Cartes et questions livrées</h3><p>Écrites pour lui, pour elle, toujours vouvoyées. Exportez-les, réécrivez-les sur ordinateur, rapportez-les dans le jeu.</p></div></div>
     <div class="case monte"><span class="nombre" data-compte="1">0</span><div><h3>Téléphone</h3><p>Posé entre vous, couché, passé de main en main.</p></div></div>
     <div class="case monte"><span class="nombre" data-compte="0">0</span><div><h3>Réseau, compte, caméra</h3><p>Le jeu fonctionne en mode avion. Rien ne quitte le téléphone.</p></div></div>
     <div class="case monte"><span class="nombre">1<small>/6</small></span><div><h3>Un shot, au hasard</h3><p>En moyenne un tour sur six — ou jamais, au choix.</p></div></div>
     <div class="case monte"><span class="nombre" data-compte="1">0</span><div><h3>Bouton pour passer</h3><p>Toujours à portée, pour l'un comme pour l'autre : il clôt l'acte.</p></div></div>
-    <div class="case bande monte"><span class="nombre" data-compte="1">0</span><div><h3>Gage final</h3><p>Pour celui qui s'est le plus dégonflé. À égalité, le sort tranche.</p></div></div>
+    <div class="case monte"><span class="nombre">1<small>/4</small></span><div><h3>Une question, au hasard</h3><p>En moyenne un tour sur quatre, pendant les deux premiers actes.</p></div></div>
+    <div class="case gage monte"><span class="nombre" data-compte="1">0</span><div><h3>Gage final</h3><p>Pour celui qui s'est le plus dégonflé. À égalité, le sort tranche.</p></div></div>
   </div>
 </section>
 
@@ -674,6 +775,7 @@ footer .legal p { max-width: 70ch; }
   const repliques = [
     ["Mademoiselle retirera ses bas, lentement.", "Premier acte"],
     ["Monsieur ôtera sa chemise, bouton après bouton, sans quitter Mademoiselle des yeux.", "Premier acte"],
+    ["Mademoiselle, où aimez-vous être embrassée, en dehors de la bouche ?", "Une question"],
     ["Trinquez : un shot chacun, sans vous quitter des yeux.", "Un shot"],
     ["Vous offrirez à votre partenaire un massage complet, de la nuque aux chevilles.", "Le gage"],
   ];
@@ -683,6 +785,8 @@ footer .legal p { max-width: 70ch; }
   const montrer = () => {
     replique.innerHTML = repliques[r][0].split(" ").map((m, i) => `<span class="mot" style="--i:${i}">${m} </span>`).join("");
     qui.textContent = repliques[r][1];
+    qui.classList.toggle("est-question", repliques[r][1] === "Une question");
+    qui.closest(".ton").classList.toggle("question-en-cours", repliques[r][1] === "Une question");
     [...points.children].forEach((p, i) => p.classList.toggle("actif", i === r));
     replique.classList.remove("sort");
     void replique.offsetWidth;
@@ -693,6 +797,21 @@ footer .legal p { max-width: 70ch; }
     replique.classList.replace("entre", "sort");
     setTimeout(() => { r = (r + 1) % repliques.length; montrer(); }, 700);
   }, 5200);
+
+  // La pile de questions : celle du dessus s'envole, les autres montent d'un rang.
+  const pile = $("pile");
+  if (!reduit) {
+    let enVue = false;
+    new IntersectionObserver(([e]) => { enVue = e.isIntersecting; }, { threshold: .3 }).observe(pile);
+    setInterval(() => {
+      if (!enVue) return;
+      const cartes = [...pile.children];
+      const dessus = cartes.find((c) => c.dataset.rang === "0");
+      dessus.classList.add("part");
+      cartes.forEach((c) => { if (c !== dessus) c.dataset.rang = String(+c.dataset.rang - 1); });
+      setTimeout(() => { dessus.classList.remove("part"); dessus.dataset.rang = String(cartes.length - 1); }, 900);
+    }, 4600);
+  }
 
   if (reduit) return;
 
